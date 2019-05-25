@@ -1,0 +1,6 @@
+.VideoBox {
+    height: 100vh;
+    left: 0px;
+    position: "relative";
+    z-index: 1;
+}
