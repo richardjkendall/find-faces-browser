@@ -1,5 +1,5 @@
 import * as faceapi from 'face-api.js';
-import uuidv4 from 'uuid/v4';
+//import uuidv4 from 'uuid/v4';
 
 // Load models and weights
 export async function loadModels() {
@@ -38,7 +38,7 @@ export async function findMatchingFaces(fullDesc, labels, descriptors, faceGraph
     }
 
     // special case for first time function is called with empty face set
-    if (labels.length == 0) {
+    if (labels.length === 0) {
         //console.log("zero length labels");
         //console.log("fulldesc", fullDesc);
         var newLabels = fullDesc.map((fd, i) => {return "person " + i});
@@ -59,14 +59,7 @@ export async function findMatchingFaces(fullDesc, labels, descriptors, faceGraph
         return 0;
     }
     
-    // create labeled dataset and facematcher
-    //var labeledDescriptors = faceapi.LabeledFaceDescriptors(labels, descriptors);
-    var labeledDescriptors = labels.map((label, i) => {
-        //console.log("working on face ", label, i);
-        return faceapi.LabeledFaceDescriptors(label, [descriptors[i]])
-    });
-
-    //const faceMatcher = new faceapi.FaceMatcher(labeledDescriptors, maxDistance);
+    // create facematcher
     const faceMatcher = new faceapi.FaceMatcher(descriptors, maxDistance);
     
     // match new faces with existing faces

@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@dagrejs/graphlib": "^2.1.4",
+    "chroma-js": "^2.0.3",
     "face-api.js": "^0.20.0",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

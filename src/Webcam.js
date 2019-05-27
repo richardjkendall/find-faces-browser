@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
-import graphlib from '@dagrejs/graphlib';
+//import graphlib from '@dagrejs/graphlib';
 
-import { loadModels, getFullFaceDescription, findMatchingFaces } from './face';
+import { loadModels, getFullFaceDescription } from './face';
 
 import './Webcam.css'
 
@@ -9,10 +9,11 @@ class Webcam extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            faces: []
+            faces: [],
+            history: 0
         };
         this._v = 0;
-        this._g = new graphlib.Graph({directed: false});
+        //this._g = new graphlib.Graph({directed: false});
         this._labels = [];
         this._descriptors = [];
     }
@@ -45,25 +46,82 @@ class Webcam extends Component {
         clearInterval(this.interval);
     }
 
+    summariseFaceData(data) {
+        var count = data.length;
+        var emotions = data.map((fd) => {
+            const expressions = Object.entries(fd.expressions);
+            var expression_hw = 0;
+            var high_expression = "";
+            for (const [expression, val] of expressions) {
+                if (val > expression_hw) {
+                    expression_hw = val;
+                    high_expression = expression;
+                }
+            }
+            return high_expression;
+        });
+        var emotionDict = {
+            "angry": 0,
+            "disgusted": 0,
+            "fearful": 0,
+            "happy": 0,
+            "neutral": 0,
+            "sad": 0,
+            "surprised": 0
+        };
+        emotions.map((e) => {
+            emotionDict[e]++;
+        });
+        return {
+            count: count,
+            emotions: emotionDict
+        };
+    }
+
+    mergeSummaryAndHistory(summary) {
+        var current = this.state.history;
+        var emotionList = ["angry", "disgusted", "fearful", "happy", "neutral", "sad", "surprised"];
+        if(current === 0) {
+            return summary;
+        } else {
+            current.count += summary.count;
+            for (let e of emotionList) {
+                current.emotions[e] += summary.emotions[e];
+            }
+        }
+        return current;
+    }
+
     runDetectLoop() {
         console.log("running detect loop");
         const vidRect = this._v.getBoundingClientRect();
         const displaySize = { width: vidRect.width, height: vidRect.height };
         this.interval = setInterval(async () => {
+            var start = window.performance.now();
             await getFullFaceDescription(this._v, displaySize)
                 .then(fullDesc => {
-                    //console.log(fullDesc);
+                    var finish = window.performance.now();
+                    /* all commented out because this is not working properly and it is not finished yet */
                     // call the matching face finder
                     //console.log("before call to face matcher, labels", this._labels, ", descriptors", this._descriptors);
                     //findMatchingFaces(fullDesc, this._labels, this._descriptors, this._g, 0.6);
                     //console.log("back from find matching faces, labels", this._labels, ", descriptors", this._descriptors);
                     //console.log("face graph", this._g);
                     //console.log("face graph components", graphlib.alg.components(this._g));
+                    //console.log(fullDesc);
+                    var summary = this.summariseFaceData(fullDesc);
+                    //console.log(summary);
                     this.setState({
-                        faces: fullDesc
+                        faces: fullDesc,
+                        history: this.mergeSummaryAndHistory(summary)
+                    });
+                    this.props.callback({
+                        current: summary,
+                        history: this.state.history,
+                        duration: finish - start
                     });
                 });
-        }, 100);
+        }, 200);
     }
 
     render() {
@@ -96,7 +154,6 @@ class Webcam extends Component {
             });
             labels = faces.map((face, i) => {
                 var _H = face.detection.box.height;
-                var _W = face.detection.box.width;
                 var _X = face.detection.box._x;
                 var _Y = face.detection.box._y;
                 var _T = _H + _Y;
