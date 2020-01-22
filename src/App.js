@@ -13,7 +13,6 @@ class App extends Component {
   }
 
   callbackForWebcam(faces) {
-    //console.log(faces);
     this.setState({
       faceSummary: faces
     });
