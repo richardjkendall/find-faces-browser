@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import Webcam from './Webcam';
 import InfoBar from './InfoBar';
-import Logo from './Logo';
 
 import './App.css';
 
@@ -25,7 +24,6 @@ class App extends Component {
       <div>
         <Webcam callback={this.callbackForWebcam.bind(this)} />
         <InfoBar faces={this.state.faceSummary} />
-        <Logo/>
       </div>
     )
   }
