@@ -6,6 +6,8 @@ Makes use of face-api.js https://justadudewhohacks.github.io/face-api.js/docs/in
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+You can see a demo here: https://faces.zz9pza.co
+
 ## Available Scripts
 
 In the project directory, you can run:
